@@ -4,10 +4,10 @@
   "description": "Nest Halloween Feedback Survey (Vercel)",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "npx serve public",
+    "start": "npx serve public"
   },
   "dependencies": {
-    "@octokit/rest": "^21.0.0"
+    "@octokit/rest": "^18.12.0"
   }
 }
