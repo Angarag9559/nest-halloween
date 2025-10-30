@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nest Halloween Feedback</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <style>
+  .glow {
+    color: #ff9933;
+    text-shadow: 0 0 10px #ff6600, 0 0 20px #ff3300, 0 0 40px #ff2200;
+    animation: flicker 2.5s infinite alternate;
+  }
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      text-shadow:
+        0 0 5px #ff6600,
+        0 0 10px #ff3300,
+        0 0 20px #ff2200,
+        0 0 40px #ff2200;
+    }
+    20%, 24%, 55% {
+      opacity: 0.8;
+      text-shadow:
+        0 0 2px #ff6600,
+        0 0 5px #ff3300,
+        0 0 10px #ff2200;
+    }
+  }
+</style>
+
+</head>
+
+<body class="bg-gradient-to-b from-black via-purple-900 to-orange-900 min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+  <header class="text-center mb-8 fade-in">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-orange-400 glow mb-3 text-center leading-tight">
+        Nest Halloween Party
+    </h1>
+
+    <p class="text-lg sm:text-xl text-orange-200">
+      Rate the fun and share your spooky thoughts!
+    </p>
+  </header>
+
+  <main class="w-full max-w-lg bg-gray-900 bg-opacity-90 text-white rounded-2xl shadow-2xl p-6 sm:p-8 fade-in">
+    <!-- Rating -->
+    <div class="flex justify-center mb-6 space-x-3 text-yellow-400 text-3xl sm:text-4xl" id="ratingStars">
+      <i class="fa fa-star-o cursor-pointer transition-transform transform hover:scale-125" data-value="1"></i>
+      <i class="fa fa-star-o cursor-pointer transition-transform transform hover:scale-125" data-value="2"></i>
+      <i class="fa fa-star-o cursor-pointer transition-transform transform hover:scale-125" data-value="3"></i>
+      <i class="fa fa-star-o cursor-pointer transition-transform transform hover:scale-125" data-value="4"></i>
+      <i class="fa fa-star-o cursor-pointer transition-transform transform hover:scale-125" data-value="5"></i>
+    </div>
+
+    <!-- Textarea -->
+    <textarea
+      id="feedbackText"
+      class="w-full h-40 sm:h-48 p-4 rounded-xl text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+      placeholder="Share your feedback..."></textarea>
+
+    <!-- Submit button -->
+    <button
+      id="submitBtn"
+      class="mt-6 w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-400/50">
+      Submit Feedback
+    </button>
+  </main>
+
+  <footer class="mt-8 text-orange-300 text-sm fade-in">
+    © Nest Halloween 2025
+  </footer>
+
+  <script>
+    let selectedRating = 0;
+    const stars = document.querySelectorAll("#ratingStars i");
+
+    stars.forEach(star => {
+      star.addEventListener("click", () => {
+        selectedRating = parseInt(star.getAttribute("data-value"));
+        updateStars();
+      });
+    });
+
+    function updateStars() {
+      stars.forEach(star => {
+        const value = parseInt(star.getAttribute("data-value"));
+        star.classList.toggle("fa-star", value <= selectedRating);
+        star.classList.toggle("fa-star-o", value > selectedRating);
+      });
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const text = document.getElementById("feedbackText").value.trim();
+
+      if (!text || selectedRating === 0) {
+        alert("Please select a rating and write feedback!");
+        return;
+      }
+
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+
+      try {
+        const res = await fetch("/api/submit-feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, rating: selectedRating }),
+        });
+
+        if (res.ok) {
+          alert("Thanks for your feedback!");
+          document.getElementById("feedbackText").value = "";
+          selectedRating = 0;
+          updateStars();
+        } else {
+          alert("Failed to submit. Please try again.");
+        }
+      } catch (err) {
+        alert("Error submitting feedback.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Submit Feedback";
+      }
+    });
+  </script>
+</body>
+</html>
